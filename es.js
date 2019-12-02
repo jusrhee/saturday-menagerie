@@ -33,7 +33,7 @@
 
   Checklist:
   [X] Straight up
-  [X] Diagonal (no walls) - checked symmetric
+  [X] Diagonal (no walls) // checked 4-way symmetric
   [ ] Diagonal (walls)
 
 */
@@ -56,7 +56,8 @@ var randn_bm = () => {
     return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
 }
 
-function softmax(arr) {
+// [Borrowed] Softmax
+var softmax = (arr) => {
     return arr.map(function(value,index) {
       return Math.exp(value) / arr.map( function(y /*value*/){ return Math.exp(y) } ).reduce( function(a,b){ return a+b })
     })
@@ -183,12 +184,23 @@ var evaluate = (agent, initState, display) => {
     }
 
     // Update reward and check for termination
-    if (state.taxiRow === 4 && state.taxiColumn === 0) {
+    if (state.taxiRow === 4 && state.taxiColumn === 3) {
       reward += 20;
       break;
     }
   }
   return reward;
+}
+
+// Processes a single update to theta
+var updateTheta = (theta, epsilons, rewards) => {
+  let accEpsilon = math.zeros([32, 1]);
+  for (var j=0; j < population; j++) {
+    let weighedEpsilon = math.multiply(rewards[j], epsilons[j]);
+    accEpsilon = math.add(accEpsilon, weighedEpsilon);
+  }
+  accEpsilon = math.multiply(alpha, math.divide(accEpsilon, population*sigma));
+  return math.add(theta, accEpsilon);
 }
 
 // Agent object [Sanity Check]
@@ -237,7 +249,7 @@ Agent.prototype.actOnState = function(state) {
 var evolve = () => {
   let map = {
     taxiRow: 0,
-    taxiColumn: 4,
+    taxiColumn: 0,
     passenger: 4,
     destination: 0,
     actionLog: null,
@@ -268,14 +280,7 @@ var evolve = () => {
       let reward = evaluate(agent, map, false);
       rewards.push(reward);
     }
-
-    let accEpsilon = math.zeros([32, 1]);
-    for (var j=0; j < population; j++) {
-      let weighedEpsilon = math.multiply(rewards[j], epsilons[j]);
-      accEpsilon = math.add(accEpsilon, weighedEpsilon);
-    }
-    accEpsilon = math.multiply(alpha, math.divide(accEpsilon, population*sigma));
-    theta = math.add(theta, accEpsilon);
+    theta = updateTheta(theta, epsilons, rewards);
 
     averageFitness = rewards.reduce((a,b) => a + b, 0)/population;
     console.log('Generation', g, '-', 'Score:', averageFitness);
@@ -287,57 +292,3 @@ var evolve = () => {
   console.log();
 }
 evolve();
-
-
-/*
-### Graveyard ###
-var theta = math.random([20, 1], 0.3);
-
-console.log(theta);
-console.log(math.add(theta, math.multiply(sigma, perturbVec)));
-
-
-var theta = math.random([20, 1], 0.3);
-
-console.log(theta);
-console.log(math.add(theta, math.multiply(sigma, perturbVec)));
-
-console.log(evaluate(guy, map, false));
-console.log(state);
-
-
-There are 6 discrete deterministic actions:
- - 0: move south
- - 1: move north
- - 2: move east
- - 3: move west
- - 4: pickup passenger
- - 5: dropoff passenger
-
-
-// Performs a single ES optimization step on param vector theta
-var repopulateES = (thetaOld, scores, espilons) => {
-
-  return thetaNew;
-}
-
-var learn = () => {
-  theta = initializePopulation();
-
-  // Learning loop
-  for (var i=0; i < maxGenerations; i++) {
-
-    scores = evaluateAgents(agents);
-  }
-}
-
-var twirlTimer = (function() {
-  var P = [chalk.bgHex('#f5ef42')("wow"), "oh", "hi", "geez"];
-  var x = 0;
-  return setInterval(function() {
-    process.stdout.write("\r" + P[x++]);
-    x &= 3;
-  }, 250);
-})();
-
-*/
