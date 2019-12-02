@@ -44,7 +44,7 @@ const math = require('mathjs');
 // Settings
 const maxGenerations = 500;
 const alpha = 0.01;
-const sigma = 0.3;
+const sigma = 0.4;
 const moveLimit = 100;
 const population = 100;
 
