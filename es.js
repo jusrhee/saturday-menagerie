@@ -34,7 +34,8 @@
   Checklist:
   [X] Straight up
   [X] Diagonal (no walls) // checked 4-way symmetric
-  [ ] Diagonal (walls)
+  [X] Diagonal (walls) // 1 hidden layer w/ 4 nodes
+  [ ] Diagonal (walls) // 3 hidden layers w/ 50 nodes each
 
 */
 
@@ -194,7 +195,7 @@ var evaluate = (agent, initState, display) => {
 
 // Processes a single update to theta
 var updateTheta = (theta, epsilons, rewards) => {
-  let accEpsilon = math.zeros([32, 1]);
+  let accEpsilon = math.zeros([400, 1]);
   for (var j=0; j < population; j++) {
     let weighedEpsilon = math.multiply(rewards[j], epsilons[j]);
     accEpsilon = math.add(accEpsilon, weighedEpsilon);
@@ -226,14 +227,16 @@ var canMove = (row, column, dir) => {
 // Agent object [Sanity Check]
 function Agent(params) {
   'use strict';
-  this.l1 = math.reshape(params.slice(0, 16), [4, 4]);
-  this.l2 = math.reshape(params.slice(16, 32), [4, 4]);
+  this.l1 = math.reshape(params.slice(0, 200), [4, 50]);
+  this.l2 = math.reshape(params.slice(200, 400), [50, 4]);
 }
 Agent.prototype.actOnState = function(state) {
   // Fire neural network
   let { taxiRow, taxiColumn, passenger, destination } = state;
   let input = [taxiRow, taxiColumn, passenger, destination];
-  let output = math.multiply(math.multiply(input, this.l1), this.l2);
+  let hidden = math.multiply(input, this.l1);
+  hidden = math.map(hidden, (x) => { return Math.max(x, 0) });
+  let output = math.multiply(hidden, this.l2);
 
   // Stochastic policy selection
   let decision = Math.random();
@@ -275,7 +278,7 @@ var evolve = () => {
     actionLog: null,
   }
 
-  let theta = math.random([32, 1], 0.5);
+  let theta = math.random([400, 1], 0.1);
 
   // Generation loop
   let averageFitness = 0;
@@ -289,10 +292,10 @@ var evolve = () => {
     for (var i=0; i < population; i++) {
       // Generate epsilon/perturbation vector
       let perturbVec = []
-      for (var p=0; p < 32; p++) {
+      for (var p=0; p < 400; p++) {
         perturbVec.push(randn_bm());
       }
-      perturbVec = math.reshape(perturbVec, [32, 1]);
+      perturbVec = math.reshape(perturbVec, [400, 1]);
       epsilons.push(perturbVec);
 
       // Create and evaluate agent
