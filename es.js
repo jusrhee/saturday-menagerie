@@ -35,7 +35,7 @@
   [X] Straight up
   [X] Fixed (no walls) // checked 4-way symmetric
   [X] Fixed (walls)
-  [ ] Start at pickup (fixed)
+  [X] Start at pickup (fixed)
   [ ] Fixed proper (go to pickup and then to dropoff)
   [ ] Finale.
 
@@ -46,9 +46,9 @@ const math = require('mathjs');
 
 // Settings
 const maxGenerations = 10000;
-const alpha = 0.00002;
+const alpha = 0.000015;
 const sigma = 0.1;
-const moveLimit = 500;
+const moveLimit = 700;
 const population = 100;
 
 // [Borrowed] Standard Normal variate using Box-Muller transform.
@@ -170,6 +170,8 @@ var refreshState = (state) => {
   return state;
 }
 
+var successes = 0;
+
 // Evaluates a single agent on initial state
 var evaluate = (agent, initState, display) => {
   let state = { ...initState };
@@ -188,6 +190,7 @@ var evaluate = (agent, initState, display) => {
 
     reward += delta;
     if (delta === 20) {
+      successes += 1;
       break;
     }
     moveCount += 1;
@@ -313,7 +316,6 @@ var stochasticMove = (output, state) => {
       return 20;
     } else if (validDropoff(state) !== -1 && state.passenger === 4) {
       state.passenger = validDropoff(state);
-      draw(state);
       return -1;
     }
     return -10;
@@ -342,8 +344,8 @@ Agent.prototype.actOnState = function(state) {
 // Main learning loop [Sanity Check]
 var evolve = () => {
   let map = {
-    taxiRow: 0,
-    taxiColumn: 4,
+    taxiRow: 2,
+    taxiColumn: 2,
     passenger: 1,
     destination: 0,
     actionLog: null,
@@ -353,6 +355,8 @@ var evolve = () => {
   // Generation loop
   let averageFitness = 0;
   for (var g=0; g < maxGenerations; g++) {
+    successes = 0;
+
     if (averageFitness >= 999) {
       break;
     }
@@ -377,7 +381,7 @@ var evolve = () => {
     theta = updateTheta(theta, epsilons, rewards);
 
     averageFitness = rewards.reduce((a,b) => a + b, 0)/population;
-    console.log('Generation', g, '-', 'Score:', averageFitness);
+    console.log('Generation', g, '-', 'Score:', averageFitness, successes);
   }
 
   let apex = new Agent(theta);
