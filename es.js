@@ -36,7 +36,7 @@
   [X] Fixed (no walls) // checked 4-way symmetric
   [X] Fixed (walls)
   [ ] Start at pickup (fixed)
-  [ ] Pickup and dropoff (fixed)
+  [ ] Fixed proper (go to pickup and then to dropoff)
   [ ] Finale.
 
 */
@@ -46,9 +46,9 @@ const math = require('mathjs');
 
 // Settings
 const maxGenerations = 10000;
-const alpha = 0.0001;
-const sigma = 0.08;
-const moveLimit = 100;
+const alpha = 0.00002;
+const sigma = 0.1;
+const moveLimit = 500;
 const population = 100;
 
 // [Borrowed] Standard Normal variate using Box-Muller transform.
@@ -240,8 +240,8 @@ var validPickup = (row, column, passenger) => {
   return false;
 }
 
-// Check for valid dropoff attempt
-var validDropoff = (state) => {
+// Check for correct dropoff attempt
+var correctDropoff = (state) => {
   let { taxiRow, taxiColumn, passenger, destination } = state;
   if (passenger !== 4) {
     return false;
@@ -255,6 +255,20 @@ var validDropoff = (state) => {
     return true;
   }
   return false;
+}
+
+// Check valid dropoff (-1 for invalid, 0-3 for location)
+var validDropoff = (taxiRow, taxiColumn) => {
+  if (taxiRow === 0 && taxiColumn === 0) {
+    return 0;
+  } else if (taxiRow === 0 && taxiColumn === 4) {
+    return 1;
+  } else if (taxiRow === 4 && taxiColumn === 0) {
+    return 2;
+  } else if (taxiRow === 4 && taxiColumn === 3) {
+    return 3;
+  }
+  return -1;
 }
 
 // Executes one stochastic action and returns action reward
@@ -291,14 +305,18 @@ var stochasticMove = (output, state) => {
     if (validPickup(state.taxiRow, state.taxiColumn, state.passenger)) {
       state.passenger = 4;
     } else {
-      return -1;
+      return -10;
     }
   } else {
     state.actionLog = 5;
-    if (validDropoff(state)) {
+    if (correctDropoff(state)) {
       return 20;
+    } else if (validDropoff(state) !== -1 && state.passenger === 4) {
+      state.passenger = validDropoff(state);
+      draw(state);
+      return -1;
     }
-    return -1;
+    return -10;
   }
   return -1;
 }
