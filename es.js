@@ -33,9 +33,9 @@
 
   Checklist:
   [X] Straight up
-  [X] Diagonal (no walls) // checked 4-way symmetric
-  [X] Diagonal (walls) // 1 hidden layer w/ 4 nodes
-  [ ] Diagonal (walls) // 3 hidden layers w/ 50 nodes each
+  [X] Fixed (no walls) // checked 4-way symmetric
+  [X] Fixed (walls)
+  [ ] Pickup and dropoff fixed
 
 */
 
@@ -43,7 +43,7 @@ const chalk = require('chalk');
 const math = require('mathjs');
 
 // Settings
-const maxGenerations = 5000;
+const maxGenerations = 200;
 const alpha = 0.0002;
 const sigma = 0.04;
 const moveLimit = 100;
@@ -178,7 +178,10 @@ var evaluate = (agent, initState, display) => {
   // Evaluation loop
   let reward = 0;
   while (reward >= -moveLimit) {
-    agent.actOnState(state);
+    let penalty = agent.actOnState(state);
+    if (penalty !== 0) {
+      reward += penalty;
+    }
     reward -= 1;
     if (display) {
       draw(state);
@@ -195,7 +198,7 @@ var evaluate = (agent, initState, display) => {
 
 // Processes a single update to theta
 var updateTheta = (theta, epsilons, rewards) => {
-  let accEpsilon = math.zeros([400, 1]);
+  let accEpsilon = math.zeros([500, 1]);
   for (var j=0; j < population; j++) {
     let weighedEpsilon = math.multiply(rewards[j], epsilons[j]);
     accEpsilon = math.add(accEpsilon, weighedEpsilon);
@@ -224,27 +227,15 @@ var canMove = (row, column, dir) => {
   return true;
 }
 
-// Agent object [Sanity Check]
-function Agent(params) {
-  'use strict';
-  this.l1 = math.reshape(params.slice(0, 200), [4, 50]);
-  this.l2 = math.reshape(params.slice(200, 400), [50, 4]);
-}
-Agent.prototype.actOnState = function(state) {
-  // Fire neural network
-  let { taxiRow, taxiColumn, passenger, destination } = state;
-  let input = [taxiRow, taxiColumn, passenger, destination];
-  let hidden = math.multiply(input, this.l1);
-  hidden = math.map(hidden, (x) => { return Math.max(x, 0) });
-  let output = math.multiply(hidden, this.l2);
-
-  // Stochastic policy selection
+// Executes one stochastic action and returns illegal move penalty
+var stochasticMove = (output, state) => {
   let decision = Math.random();
-  soft = softmax(output);
+  let soft = softmax(output);
   threshOne = soft[0];
   threshTwo = threshOne + soft[1];
   threshThree = threshTwo + soft[2];
-  threshFour = 1;
+  threshFour = threshThree + soft[3];
+  threshFive = threshFour + soft[4];
   if (decision <= threshOne) {
     state.actionLog = 1;
     if (state.taxiRow > 0) {
@@ -260,12 +251,37 @@ Agent.prototype.actOnState = function(state) {
     if (state.taxiColumn > 0 && canMove(state.taxiRow, state.taxiColumn, -1)) {
       state.taxiColumn -= 1;
     }
-  } else {
+  } else if (decision <= threshFour) {
     state.actionLog = 2;
     if (state.taxiColumn < 4 && canMove(state.taxiRow, state.taxiColumn, 1)) {
       state.taxiColumn += 1;
     }
+  } else if (decision <= threshFive) {
+    state.actionLog = 4;
+    return -10;
+  } else {
+    state.actionLog = 5;
+    return -10;
   }
+  return 0;
+}
+
+// Agent object [Sanity Check]
+function Agent(params) {
+  'use strict';
+  this.l1 = math.reshape(params.slice(0, 200), [4, 50]);
+  this.l2 = math.reshape(params.slice(200, 500), [50, 6]);
+}
+Agent.prototype.actOnState = function(state) {
+  // Fire neural network
+  let { taxiRow, taxiColumn, passenger, destination } = state;
+  let input = [taxiRow, taxiColumn, passenger, destination];
+  let hidden = math.multiply(input, this.l1);
+  hidden = math.map(hidden, (x) => { return Math.max(x, 0) });
+  let output = math.multiply(hidden, this.l2);
+
+  // Stochastic policy selection (updates passively and returns penalty)
+  return stochasticMove(output, state);
 };
 
 // Main learning loop [Sanity Check]
@@ -278,7 +294,7 @@ var evolve = () => {
     actionLog: null,
   }
 
-  let theta = math.random([400, 1], 0.1);
+  let theta = math.random([500, 1], 0.1);
 
   // Generation loop
   let averageFitness = 0;
@@ -292,10 +308,10 @@ var evolve = () => {
     for (var i=0; i < population; i++) {
       // Generate epsilon/perturbation vector
       let perturbVec = []
-      for (var p=0; p < 400; p++) {
+      for (var p=0; p < 500; p++) {
         perturbVec.push(randn_bm());
       }
-      perturbVec = math.reshape(perturbVec, [400, 1]);
+      perturbVec = math.reshape(perturbVec, [500, 1]);
       epsilons.push(perturbVec);
 
       // Create and evaluate agent
