@@ -35,7 +35,9 @@
   [X] Straight up
   [X] Fixed (no walls) // checked 4-way symmetric
   [X] Fixed (walls)
-  [ ] Pickup and dropoff fixed
+  [ ] Start at pickup (fixed)
+  [ ] Pickup and dropoff (fixed)
+  [ ] Finale.
 
 */
 
@@ -43,9 +45,9 @@ const chalk = require('chalk');
 const math = require('mathjs');
 
 // Settings
-const maxGenerations = 200;
-const alpha = 0.0002;
-const sigma = 0.04;
+const maxGenerations = 10000;
+const alpha = 0.0001;
+const sigma = 0.08;
 const moveLimit = 100;
 const population = 100;
 
@@ -168,7 +170,7 @@ var refreshState = (state) => {
   return state;
 }
 
-// Evaluates a single agent on initial state [Sanity Check]
+// Evaluates a single agent on initial state
 var evaluate = (agent, initState, display) => {
   let state = { ...initState };
   if (display) {
@@ -177,21 +179,18 @@ var evaluate = (agent, initState, display) => {
 
   // Evaluation loop
   let reward = 0;
-  while (reward >= -moveLimit) {
-    let penalty = agent.actOnState(state);
-    if (penalty !== 0) {
-      reward += penalty;
-    }
-    reward -= 1;
+  let moveCount = 0;
+  while (moveCount <= moveLimit) {
+    let delta = agent.actOnState(state);
     if (display) {
       draw(state);
     }
 
-    // Update reward and check for termination
-    if (state.taxiRow === 0 && state.taxiColumn === 0) {
-      reward += 20;
+    reward += delta;
+    if (delta === 20) {
       break;
     }
+    moveCount += 1;
   }
   return reward;
 }
@@ -227,7 +226,38 @@ var canMove = (row, column, dir) => {
   return true;
 }
 
-// Executes one stochastic action and returns illegal move penalty
+// Check for valid pickup attempt
+var validPickup = (row, column, passenger) => {
+  if (passenger === 0 && row === 0 && column === 0) {
+    return true;
+  } else if (passenger === 1 && row === 0 && column === 4) {
+    return true;
+  } else if (passenger === 2 && row === 4 && column === 0) {
+    return true;
+  } else if (passenger === 3 && row === 4 && column === 3) {
+    return true;
+  }
+  return false;
+}
+
+// Check for valid dropoff attempt
+var validDropoff = (state) => {
+  let { taxiRow, taxiColumn, passenger, destination } = state;
+  if (passenger !== 4) {
+    return false;
+  } else if (destination === 0 && taxiRow === 0 && taxiColumn === 0) {
+    return true;
+  } else if (destination === 1 && taxiRow === 0 && taxiColumn === 4) {
+    return true;
+  } else if (destination === 2 && taxiRow === 4 && taxiColumn === 0) {
+    return true;
+  } else if (destination === 3 && taxiRow === 4 && taxiColumn === 3) {
+    return true;
+  }
+  return false;
+}
+
+// Executes one stochastic action and returns action reward
 var stochasticMove = (output, state) => {
   let decision = Math.random();
   let soft = softmax(output);
@@ -258,12 +288,19 @@ var stochasticMove = (output, state) => {
     }
   } else if (decision <= threshFive) {
     state.actionLog = 4;
-    return -10;
+    if (validPickup(state.taxiRow, state.taxiColumn, state.passenger)) {
+      state.passenger = 4;
+    } else {
+      return -1;
+    }
   } else {
     state.actionLog = 5;
-    return -10;
+    if (validDropoff(state)) {
+      return 20;
+    }
+    return -1;
   }
-  return 0;
+  return -1;
 }
 
 // Agent object [Sanity Check]
@@ -280,20 +317,19 @@ Agent.prototype.actOnState = function(state) {
   hidden = math.map(hidden, (x) => { return Math.max(x, 0) });
   let output = math.multiply(hidden, this.l2);
 
-  // Stochastic policy selection (updates passively and returns penalty)
+  // Stochastic policy action (passively updates state and returns reward)
   return stochasticMove(output, state);
 };
 
 // Main learning loop [Sanity Check]
 var evolve = () => {
   let map = {
-    taxiRow: 4,
-    taxiColumn: 3,
-    passenger: 4,
+    taxiRow: 0,
+    taxiColumn: 4,
+    passenger: 1,
     destination: 0,
     actionLog: null,
   }
-
   let theta = math.random([500, 1], 0.1);
 
   // Generation loop
