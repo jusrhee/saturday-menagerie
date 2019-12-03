@@ -42,9 +42,9 @@ const chalk = require('chalk');
 const math = require('mathjs');
 
 // Settings
-const maxGenerations = 500;
-const alpha = 0.01;
-const sigma = 0.4;
+const maxGenerations = 10000;
+const alpha = 0.0002;
+const sigma = 0.08;
 const moveLimit = 100;
 const population = 100;
 
@@ -203,6 +203,26 @@ var updateTheta = (theta, epsilons, rewards) => {
   return math.add(theta, accEpsilon);
 }
 
+// Check for a wall on move attempt
+var canMove = (row, column, dir) => {
+  if (dir === -1) {
+    if (row < 2 && column === 2) {
+      return false;
+    }
+    if (row > 2 && (column === 1 || column === 3)) {
+      return false;
+    }
+  } else {
+    if (row < 2 && column === 1) {
+      return false;
+    }
+    if (row > 2 && (column === 0 || column === 2)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // Agent object [Sanity Check]
 function Agent(params) {
   'use strict';
@@ -234,12 +254,12 @@ Agent.prototype.actOnState = function(state) {
     }
   } else if (decision <= threshThree) {
     state.actionLog = 3;
-    if (state.taxiColumn > 0) {
+    if (state.taxiColumn > 0 && canMove(state.taxiRow, state.taxiColumn, -1)) {
       state.taxiColumn -= 1;
     }
   } else {
     state.actionLog = 2;
-    if (state.taxiColumn < 4) {
+    if (state.taxiColumn < 4 && canMove(state.taxiRow, state.taxiColumn, 1)) {
       state.taxiColumn += 1;
     }
   }
@@ -248,13 +268,14 @@ Agent.prototype.actOnState = function(state) {
 // Main learning loop [Sanity Check]
 var evolve = () => {
   let map = {
-    taxiRow: 0,
-    taxiColumn: 0,
+    taxiRow: 1,
+    taxiColumn: 1,
     passenger: 4,
     destination: 0,
     actionLog: null,
   }
-  let theta = math.random([32, 1], 1);
+
+  let theta = math.random([32, 1], 0.5);
 
   // Generation loop
   let averageFitness = 0;
