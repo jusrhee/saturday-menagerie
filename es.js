@@ -42,7 +42,7 @@ const chalk = require('chalk');
 const math = require('mathjs');
 
 // Settings
-const maxGenerations = 10000;
+const maxGenerations = 5000;
 const alpha = 0.0002;
 const sigma = 0.04;
 const moveLimit = 100;
@@ -184,7 +184,7 @@ var evaluate = (agent, initState, display) => {
     }
 
     // Update reward and check for termination
-    if (state.taxiRow === 4 && state.taxiColumn === 3) {
+    if (state.taxiRow === 0 && state.taxiColumn === 0) {
       reward += 20;
       break;
     }
@@ -268,8 +268,8 @@ Agent.prototype.actOnState = function(state) {
 // Main learning loop [Sanity Check]
 var evolve = () => {
   let map = {
-    taxiRow: 0,
-    taxiColumn: 0,
+    taxiRow: 4,
+    taxiColumn: 3,
     passenger: 4,
     destination: 0,
     actionLog: null,
