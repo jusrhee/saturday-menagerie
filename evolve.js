@@ -1,16 +1,20 @@
 /*
+
   ### TAXI V3 - PROBLEM SPECIFICATION ###
+
   Passenger locations:
   - 0: R(ed)
   - 1: G(reen)
   - 2: Y(ellow)
   - 3: B(lue)
   - 4: in taxi
+
   Destinations:
   - 0: R(ed)
   - 1: G(reen)
   - 2: Y(ellow)
   - 3: B(lue)
+
   Actions:
   There are 6 discrete deterministic actions:
   - 0: move south
@@ -19,18 +23,22 @@
   - 3: move west
   - 4: pickup passenger
   - 5: dropoff passenger
+
   Rewards:
   There is a reward of -1 for each action and an additional reward of +20 for
   delivering the passenger. There is a reward of -10 for executing actions "pickup"
   and "dropoff" illegally.
+
   ------------------
+
   Checklist:
   [X] Straight up
   [X] Fixed (no walls) // checked 4-way symmetric
   [X] Fixed (walls)
   [X] Start at pickup (fixed)
-  [ ] Fixed proper (go to pickup and then to dropoff)
+  [X] Fixed proper (go to pickup and then to dropoff)
   [ ] Finale.
+
 */
 
 const chalk = require('chalk');
@@ -316,7 +324,7 @@ var stochasticMove = (output, state) => {
   return -1;
 }
 
-// Agent object [Sanity Check]
+// Agent object
 function Agent(params) {
   'use strict';
   this.l1 = math.reshape(params.slice(0, 20), [5, 4]);
@@ -334,18 +342,6 @@ Agent.prototype.actOnState = function(state) {
   h2 = math.map(h2, (x) => { return Math.max(x, 0) });
   h2 = math.concat([1], h2);
   let output = math.multiply(h2, this.l3);
-
-  /*
-  let { taxiRow, taxiColumn, passenger, destination } = state;
-  let input = [1, taxiRow, taxiColumn, passenger, destination];
-  let h1 = math.multiply(input, this.l1);
-  h1 = math.map(h1, (x) => { return Math.max(x, 0) });
-  h1 = math.concat([1], h1);
-  let h2 = math.multiply(h1, this.l2);
-  h2 = math.map(h2, (x) => { return Math.max(x, 0) });
-  h2 = math.concat([1], h2);
-  let output = math.multiply(h2, this.l3);
-  */
 
   // Stochastic policy action (passively updates state and returns reward)
   return stochasticMove(output, state);
@@ -380,6 +376,7 @@ var evolve = () => {
     let rewards = [];
     let maxFitness = -999999;
     for (var i=0; i < population; i++) {
+
       // Generate epsilon/perturbation vector
       let perturbVec = []
       for (var p=0; p < 136; p++) {
