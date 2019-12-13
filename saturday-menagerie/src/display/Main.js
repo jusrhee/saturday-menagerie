@@ -3,17 +3,30 @@ import styled from 'styled-components';
 
 import { Driver } from '../taxi-v3/agents';
 import env from '../taxi-v3/env';
-import { data } from '../taxi-v3/freezer/0.js';
 
-import { create, all } from 'mathjs';
-const math = create(all);
+// TODO: generalize somehow without fs (and ideally no proxy server)
+import { data as data_0 } from '../taxi-v3/freezer/0.js'
+import { data as data_500 } from '../taxi-v3/freezer/500.js';
+import { data as data_1000 } from '../taxi-v3/freezer/1000.js';
+import { data as data_1500 } from '../taxi-v3/freezer/1500.js';
+import { data as data_2000 } from '../taxi-v3/freezer/2000.js';
+import { data as data_2314 } from '../taxi-v3/freezer/2314.js';
 
 export default class Main extends React.Component {
   state = {
-    environment: env.reset(),
+    environment: env.mTPReset(),
     play: false,
     agent: null,
     interval: null,
+  }
+
+  componentDidMount() {
+    var agent = new Driver(data_0);
+    this.setState({ agent });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.state.interval);
   }
 
   // Update by a single step (called by setInterval)
@@ -24,17 +37,8 @@ export default class Main extends React.Component {
     this.setState({ environment: feedback.observation });
 
     if (done) {
-      clearInterval(this.interval);
+      this.togglePlay(false);
     }
-  }
-
-  componentDidMount() {
-    var agent = new Driver(data);
-    this.setState({ agent });
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.interval);
   }
 
   // Returns 0 (or 1 if full) if cab is at the given coordinate for rendering
@@ -76,7 +80,7 @@ export default class Main extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ environment: env.reset() });
+    this.setState({ environment: env.mTPReset() });
   }
 
   renderPlaybackButton = () => {

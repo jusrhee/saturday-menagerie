@@ -36,6 +36,17 @@ var reset = () => {
   return state;
 }
 
+// Move to pickup reset
+var mTPReset = () => {
+  state.taxiRow = 2;
+  state.taxiColumn = 2;
+  state.passenger = 1;
+  state.destination = 0;
+
+  state.actionLog = null;
+  return state;
+}
+
 // Check for a wall on move attempt
 var canMove = (row, column, dir) => {
   if (dir === -1) {
@@ -162,4 +173,5 @@ module.exports = {
   step: step,
   reset: reset,
   getEnv: getEnv,
+  mTPReset: mTPReset,
 };

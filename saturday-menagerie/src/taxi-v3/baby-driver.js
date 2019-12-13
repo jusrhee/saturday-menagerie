@@ -23,7 +23,7 @@ var randn_bm = () => {
 var evaluateAgent = (agent) => {
   var reward = 0;
   var moveCount = 0;
-  var observation = env.reset();
+  var observation = env.mTPReset();
   while (moveCount <= moveLimit) {
     var feedback = agent.act(observation, env);
     var delta = feedback.reward;
@@ -102,11 +102,12 @@ for (var g=0; g < maxGenerations; g++) {
   averageFitness = rewards.reduce((a,b) => a + b, 0)/population;
   console.log(g, maxFitness, averageFitness, successes);
 
-  if (g % 200 === 0) {
+  if (g % 100 === 0 || averageFitness > 5) {
     var encoded = JSON.stringify(championParams)
-    fs.writeFileSync("./freezer/" + g + ".JSON", encoded);
+    encoded = 'var data = ' + encoded + '\nmodule.exports = { data: data };'
+    fs.writeFileSync("./freezer/" + g + ".js", encoded);
   }
-  if (averageFitness >= 5) {
+  if (averageFitness > 5) {
     break;
   }
 }
