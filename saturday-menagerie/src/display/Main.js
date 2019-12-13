@@ -18,11 +18,12 @@ export default class Main extends React.Component {
     play: false,
     agent: null,
     interval: null,
+    selectedAgentIndex: 0,
+    showSidebar: false,
   }
 
   componentDidMount() {
-    var agent = new Driver(data_0);
-    this.setState({ agent });
+    this.setAgent(data_0, 0);
   }
 
   componentWillUnmount() {
@@ -81,6 +82,11 @@ export default class Main extends React.Component {
 
   handleReset = () => {
     this.setState({ environment: env.mTPReset() });
+  }
+
+  setAgent = (params, i) => {
+    var agent = new Driver(params);
+    this.setState({ agent, selectedAgentIndex: i });
   }
 
   renderPlaybackButton = () => {
@@ -195,9 +201,67 @@ export default class Main extends React.Component {
     return <ActionLog>{output}</ActionLog>;
   }
 
+  renderSidebar = () => {
+    if (this.state.showSidebar) {
+      return (
+        <Sidebar>
+          <CloseIcon onClick={() => this.setState({ showSidebar: false })}>
+            <i className="material-icons">close</i>
+          </CloseIcon>
+          <SidebarTitle>
+            Select Agent
+            <Line />
+          </SidebarTitle>
+          <SidebarButton
+            onClick={() => this.setAgent(data_0, 0)}
+            selected={this.state.selectedAgentIndex === 0}
+          >
+            Generation 0
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_500, 1)}
+            selected={this.state.selectedAgentIndex === 1}
+          >
+            Generation 500
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_1000, 2)}
+            selected={this.state.selectedAgentIndex === 2}
+          >
+            Generation 1000
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_1500, 3)}
+            selected={this.state.selectedAgentIndex === 3}
+          >
+            Generation 1500
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_2000, 4)}
+            selected={this.state.selectedAgentIndex === 4}
+          >
+            Generation 2000
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_2314, 5)}
+            selected={this.state.selectedAgentIndex === 5}
+          >
+            Generation 2314
+          </SidebarButton>
+        </Sidebar>
+      )
+    }
+    return (
+      <SidebarTab onClick={() => this.setState({ showSidebar: true })}>
+        <i className="material-icons">keyboard_arrow_right</i>
+      </SidebarTab>
+    );
+  }
+
   render() {
     return (
       <StyledMain>
+        {this.renderSidebar()}
         <Tag>
           Experiment No.1
           <Title>OpenAI Taxi-v3</Title>
@@ -220,8 +284,91 @@ export default class Main extends React.Component {
   }
 }
 
+const SidebarTab = styled.div`
+  width: 30px;
+  height: 60px;
+  border-top-right-radius: 60px;
+  border-bottom-right-radius: 60px;
+  background: #ffffff33;
+  position: fixed;
+  top: calc(50vh - 60px);
+  left: 0;
+  cursor: pointer;
+
+  > i {
+    margin-top: 16px;
+    color: white;
+    font-size: 25px;
+  }
+`;
+
+const CloseIcon = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+
+  > i {
+    color: #ffffff;
+  }
+`;
+
+const Sidebar = styled.div`
+  width: 200px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: #ffffff22;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: white;
+  padding: 50px 25px 50px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  opacity: 0;
+  animation: float-sidebar 0.8s 0s;
+  animation-fill-mode: forwards;
+  @keyframes float-sidebar {
+    from { left: -200px; opacity: 1; }
+    to   { left: 0px; opacity: 1; }
+  }
+`;
+
+const SidebarTitle = styled.div`
+  margin-top: -50px;
+  margin-bottom: 20px;
+  margin-left: 5px;
+  font-size: 16px;
+  color: #ffffff88;
+`;
+
+const SidebarButton = styled.div`
+  width: 100%;
+  padding: 10px 15px;
+  font-weight: 300;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  background: ${props => props.selected ? '#ffffff11' : ''};
+
+  :hover {
+    background: #ffffff22;
+  }
+`;
+
+const Line = styled.div`
+  height: 1px;
+  width: 200px;
+  background: #ffffff88;
+  width: 90px;
+  margin-top: 10px;
+`;
+
 const Label = styled.div`
-  @import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+  @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400&display=swap');
   color: white;
   font-family: 'Open Sans', sans-serif;
   font-size: 10px;
