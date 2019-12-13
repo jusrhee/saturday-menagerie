@@ -46,11 +46,11 @@ const math = require('mathjs');
 
 // Settings
 const maxGenerations = 10000;
-const alpha = 0.00005;
-const sigma = 0.15;
+const alpha = 0.0003;
+const sigma = 0.1;
 const moveLimit = 800;
 const population = 100;
-const numTrials = 10;
+const numTrials = 1;
 
 // [Borrowed] Standard Normal variate using Box-Muller transform.
 var randn_bm = () => {
@@ -390,7 +390,7 @@ var evolve = () => {
       let agent = new Agent(params);
       let reward = 0;
       for (var t=0; t < numTrials; t++) {
-        map = refreshState(map);
+        //map = refreshState(map);
         reward += evaluate(agent, map, false);
       }
       rewards.push(reward);
@@ -404,7 +404,7 @@ var evolve = () => {
     theta = updateTheta(theta, epsilons, fitnesses);
 
     averageFitness = rewards.reduce((a,b) => a + b, 0)/population;
-    console.log(g + ', ' + maxFitness + ', ' + averageFitness + ', ' + successes);
+    console.log('Generation', g, ' - Score: ' + ', ' + maxFitness + ', ' + averageFitness + ', ' + successes);
 
     if (averageFitness >= 5) {
       break;
