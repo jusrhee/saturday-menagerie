@@ -11,6 +11,7 @@ export default class ChickenLittle extends React.Component {
     interval: null,
     selectedAgentIndex: 0,
     showSidebar: false,
+    score: 0,
   }
 
   componentWillUnmount() {
@@ -139,22 +140,13 @@ export default class ChickenLittle extends React.Component {
     var output;
     switch (this.state.environment.actionLog) {
       case 0:
-        output = '(South)';
+        output = '(Still)';
         break;
       case 1:
-        output = '(North)';
+        output = '(Left)';
         break;
       case 2:
-        output = '(East)';
-        break;
-      case 3:
-        output = '(West)';
-        break;
-      case 4:
-        output = '(Pickup)';
-        break;
-      case 5:
-        output = '(Dropoff)';
+        output = '(Right)';
         break;
       default:
           output = '(Start)';
