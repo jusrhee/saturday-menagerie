@@ -1,11 +1,11 @@
 const env = require('./env');
-const { Driver } = require('./agents');
+const { Driver, DeterminedDriver } = require('./agents');
 const math = require('mathjs');
 const fs = require('fs');
 
 // Settings
 const maxGenerations = 10000;
-const alpha = 0.0003;
+const alpha = 0.0002;
 const sigma = 0.1;
 const moveLimit = 800;
 const population = 100;
@@ -100,7 +100,7 @@ for (var g=0; g < maxGenerations; g++) {
   fitnesses = remapFitnesses(rewards);
   theta = updateTheta(theta, epsilons, fitnesses);
   averageFitness = rewards.reduce((a,b) => a + b, 0)/population;
-  console.log(g, maxFitness, averageFitness, successes);
+  console.log('Generation: ' + g + ', Max: ' + maxFitness + ', Average: ' + averageFitness + ', Success: ' + (successes/population)*100 + '%');
 
   if (g % 100 === 0 || averageFitness > 5) {
     var encoded = JSON.stringify(championParams)

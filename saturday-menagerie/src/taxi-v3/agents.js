@@ -47,6 +47,30 @@ Driver.prototype.act = function(observation, environment) {
   return environment.step(5);
 };
 
+function DeterminedDriver(params) {
+  this.l1 = math.reshape(params.slice(0, 20), [5, 4]);
+  this.l2 = math.reshape(params.slice(20, 70), [5, 10]);
+  this.l3 = math.reshape(params.slice(70, 136), [11, 6])
+}
+DeterminedDriver.prototype.act = function(observation, environment) {
+  // Fire neural network
+  var { taxiRow, taxiColumn, passenger, destination } = observation;
+  var input = [1, taxiRow, taxiColumn, passenger, destination];
+  var h1 = math.multiply(input, this.l1);
+  h1 = math.map(h1, (x) => { return Math.max(x, 0) });
+  h1 = math.concat([1], h1);
+  var h2 = math.multiply(h1, this.l2);
+  h2 = math.map(h2, (x) => { return Math.max(x, 0) });
+  h2 = math.concat([1], h2);
+  var output = math.multiply(h2, this.l3);
+
+  // Executes one deterministic action
+  var soft = softmax(output);
+  let i = soft.indexOf(Math.max(...soft));
+  return environment.step(i);
+};
+
 module.exports = {
   Driver: Driver,
+  DeterminedDriver: DeterminedDriver,
 };

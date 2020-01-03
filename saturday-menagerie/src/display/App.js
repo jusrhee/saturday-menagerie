@@ -1,5 +1,6 @@
 import React from 'react';
-import Main from './Main';
+import Taxi from './Taxi';
+import ChickenLittle from './ChickenLittle';
 import { createGlobalStyle } from 'styled-components'
 
 export default class App extends React.Component {
@@ -7,7 +8,7 @@ export default class App extends React.Component {
     return (
       <div>
         <GlobalStyle />
-        <Main />
+        <ChickenLittle />
       </div>
     );
   }

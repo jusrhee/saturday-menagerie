@@ -16,8 +16,8 @@
 var state = {
   taxiRow: 2,
   taxiColumn: 2,
-  passenger: 1,
-  destination: 0,
+  passenger: 2,
+  destination: 3,
   actionLog: null,
 }
 
@@ -40,8 +40,8 @@ var reset = () => {
 var mTPReset = () => {
   state.taxiRow = 2;
   state.taxiColumn = 2;
-  state.passenger = 1;
-  state.destination = 0;
+  state.passenger = 2;
+  state.destination = 3;
 
   state.actionLog = null;
   return state;
