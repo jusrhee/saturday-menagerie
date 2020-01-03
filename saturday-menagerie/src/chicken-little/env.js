@@ -45,14 +45,19 @@ var reset = () => {
 var isDead = (x, aX, aY, bX, bY, cX, cY) => {
   if (x === aX) {
     if (aY === 0 || aY === 1) {
+      console.log('a')
       return true
     }
-  } else if (x === bX) {
+  }
+  if (x === bX) {
     if (bY === 0 || bY === 1) {
+      console.log('b')
       return true
     }
-  } else if (x === cX) {
+  }
+  if (x === cX) {
     if (cY === 0 || cY === 1) {
+      console.log('c')
       return true
     }
   }
