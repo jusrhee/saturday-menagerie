@@ -19,8 +19,7 @@ export default class ChickenLittle extends React.Component {
 
   // Update by a single step (called by setInterval)
   step = () => {
-    var { agent } = this.state;
-    var feedback = agent.act(this.state.environment, env);
+    var feedback = env.step(2);
     var done = feedback.done;
     this.setState({ environment: feedback.observation });
 
@@ -31,10 +30,10 @@ export default class ChickenLittle extends React.Component {
 
   // Returns 0 (or 1 if full) if block is at the given coordinate for rendering
   blockHere = (j, i) => {
-    var { aX, aY, bX, bY, cX, cY, agentX } = this.state.environment;
-    if (i === agentX && j === 1) {
+    var { aX, aY, bX, bY, cX, cY, x } = this.state.environment;
+    if (i === x && j === 1) {
       return '｡';
-    } else if (i === agentX && j === 0) {
+    } else if (i === x && j === 0) {
       return 'Д';
     } else if (i === aX && j === aY) {
       return 'ბ';
@@ -57,7 +56,8 @@ export default class ChickenLittle extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ environment: env.mTPReset() });
+    this.setState({ environment: env.reset() });
+    console.log(this.state.environment);
   }
 
   renderPlaybackButton = () => {
