@@ -1,7 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { Chicken } from '../chicken-little/agents';
 import env from '../chicken-little/env';
+
+import { data as data_0 } from '../chicken-little/freezer/0.js'
+import { data as data_200 } from '../chicken-little/freezer/200.js';
+import { data as data_400 } from '../chicken-little/freezer/400.js';
+import { data as data_600 } from '../chicken-little/freezer/600.js';
+import { data as data_800 } from '../chicken-little/freezer/800.js';
+import { data as data_1400 } from '../chicken-little/freezer/1400.js';
 
 export default class ChickenLittle extends React.Component {
   state = {
@@ -14,15 +22,21 @@ export default class ChickenLittle extends React.Component {
     score: 0,
   }
 
+  componentDidMount() {
+    this.setAgent(data_0, 0);
+  }
+
   componentWillUnmount() {
     clearInterval(this.state.interval);
   }
 
   // Update by a single step (called by setInterval)
   step = () => {
-    var feedback = env.step(2);
+    var { agent } = this.state;
+    var feedback = agent.act(this.state.environment, env);
     var done = feedback.done;
-    this.setState({ environment: feedback.observation });
+    var newScore = this.state.score + feedback.reward;
+    this.setState({ environment: feedback.observation, score: newScore });
 
     if (done) {
       this.togglePlay(false);
@@ -57,8 +71,13 @@ export default class ChickenLittle extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ environment: env.reset() });
+    this.setState({ environment: env.reset(), score: 0 });
     console.log(this.state.environment);
+  }
+
+  setAgent = (params, i) => {
+    var agent = new Chicken(params);
+    this.setState({ agent, selectedAgentIndex: i });
   }
 
   renderPlaybackButton = () => {
@@ -154,9 +173,67 @@ export default class ChickenLittle extends React.Component {
     return <ActionLog>{output}</ActionLog>;
   }
 
+  renderSidebar = () => {
+    if (this.state.showSidebar) {
+      return (
+        <Sidebar>
+          <CloseIcon onClick={() => this.setState({ showSidebar: false })}>
+            <i className="material-icons">close</i>
+          </CloseIcon>
+          <SidebarTitle>
+            Select Agent
+            <Line />
+          </SidebarTitle>
+          <SidebarButton
+            onClick={() => this.setAgent(data_0, 0)}
+            selected={this.state.selectedAgentIndex === 0}
+          >
+            Generation 0
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_200, 1)}
+            selected={this.state.selectedAgentIndex === 1}
+          >
+            Generation 200
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_400, 2)}
+            selected={this.state.selectedAgentIndex === 2}
+          >
+            Generation 400
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_600, 3)}
+            selected={this.state.selectedAgentIndex === 3}
+          >
+            Generation 600
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_800, 4)}
+            selected={this.state.selectedAgentIndex === 4}
+          >
+            Generation 800
+          </SidebarButton>
+          <SidebarButton
+            onClick={() => this.setAgent(data_1400, 5)}
+            selected={this.state.selectedAgentIndex === 5}
+          >
+            Generation 1400
+          </SidebarButton>
+        </Sidebar>
+      )
+    }
+    return (
+      <SidebarTab onClick={() => this.setState({ showSidebar: true })}>
+        <i className="material-icons">keyboard_arrow_right</i>
+      </SidebarTab>
+    );
+  }
+
   render() {
     return (
       <StyledMain>
+        {this.renderSidebar()}
         <Tag>
           Experiment No.2
           <Title>Chicken Little</Title>
@@ -165,6 +242,7 @@ export default class ChickenLittle extends React.Component {
           <Ascii>
             {this.renderAscii()}
             {this.renderActionLog()}
+            <div>{this.state.score}</div>
           </Ascii>
         </DisplayWrapper>
         <NavBar>
