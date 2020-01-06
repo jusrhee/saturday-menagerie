@@ -5,11 +5,7 @@ import { Chicken } from '../chicken-little/agents';
 import env from '../chicken-little/env';
 
 import { data as data_0 } from '../chicken-little/freezer/0.js'
-import { data as data_200 } from '../chicken-little/freezer/200.js';
-import { data as data_400 } from '../chicken-little/freezer/400.js';
-import { data as data_600 } from '../chicken-little/freezer/600.js';
-import { data as data_800 } from '../chicken-little/freezer/800.js';
-import { data as data_1400 } from '../chicken-little/freezer/1400.js';
+import { data as data_100 } from '../chicken-little/freezer/100.js';
 
 export default class ChickenLittle extends React.Component {
   state = {
@@ -191,34 +187,10 @@ export default class ChickenLittle extends React.Component {
             Generation 0
           </SidebarButton>
           <SidebarButton
-            onClick={() => this.setAgent(data_200, 1)}
+            onClick={() => this.setAgent(data_100, 1)}
             selected={this.state.selectedAgentIndex === 1}
           >
-            Generation 200
-          </SidebarButton>
-          <SidebarButton
-            onClick={() => this.setAgent(data_400, 2)}
-            selected={this.state.selectedAgentIndex === 2}
-          >
-            Generation 400
-          </SidebarButton>
-          <SidebarButton
-            onClick={() => this.setAgent(data_600, 3)}
-            selected={this.state.selectedAgentIndex === 3}
-          >
-            Generation 600
-          </SidebarButton>
-          <SidebarButton
-            onClick={() => this.setAgent(data_800, 4)}
-            selected={this.state.selectedAgentIndex === 4}
-          >
-            Generation 800
-          </SidebarButton>
-          <SidebarButton
-            onClick={() => this.setAgent(data_1400, 5)}
-            selected={this.state.selectedAgentIndex === 5}
-          >
-            Generation 1400
+            Generation 100
           </SidebarButton>
         </Sidebar>
       )
