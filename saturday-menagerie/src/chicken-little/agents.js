@@ -3,14 +3,17 @@ const math = require('mathjs');
 // [Borrowed] Softmax
 var softmax = (arr) => {
   return arr.map(function(value,index) {
-    return Math.exp(value) / arr.map( function(y /*value*/){ return Math.exp(y) } ).reduce( function(a,b){ return a+b })
+    return Math.exp(value) / arr.map( function(y /*value*/){ return Math.exp(y) } )
+      .reduce( function(a,b){ return a+b })
   })
 }
 
 function Chicken(params) {
   this.l1 = math.reshape(params.slice(0, 35), [7, 5]);
-  this.l2 = math.reshape(params.slice(35, 53), [6, 3]);
+  this.l2 = math.reshape(params.slice(35, 65), [6, 5]);
+  this.l3 = math.reshape(params.slice(65,83), [6, 3])
 }
+
 Chicken.prototype.act = function(observation, env) {
   // Fire neural network
   var { x, aX, aY, bX, bY, cX, cY } = observation;
@@ -18,8 +21,10 @@ Chicken.prototype.act = function(observation, env) {
   var h1 = math.multiply(input, this.l1);
   h1 = math.map(h1, (x) => { return Math.max(x, 0) });
   h1 = math.concat([1], h1);
-  var output = math.multiply(h1, this.l2);
-
+  var h2 = math.multiply(h1, this.l2);
+  h2 = math.map(h2, (x) => { return Math.max(x, 0) });
+  h2 = math.concat([1], h2);
+  var output = math.multiply(h2, this.l3);
 
   // Executes one stochastic action
   var decision = Math.random();
