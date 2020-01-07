@@ -1,15 +1,16 @@
 const env = require('./env');
-const { Chicken } = require('./agents');
+const { Chicken: Agent } = require('./agents');
 const math = require('mathjs');
 const fs = require('fs');
 
 // Settings
 const maxGenerations = 5000;
 const alpha = 0.0003;
-const sigma = 0.1;
-const population = 200;
-const numTrials = 3;
-const numParams = 53;
+const populationSize = 200;
+const numTrials = 5;
+const numParams = 83;
+const numElite = 20;
+const metaSigma = 1;
 
 // [Borrowed] Standard Normal variate using Box-Muller transform.
 var randn_bm = () => {
@@ -35,13 +36,14 @@ var evaluateAgent = (agent) => {
 }
 
 // Processes a single update to theta
-var updateTheta = (theta, epsilons, rewards) => {
+var updateTheta = (theta, epsilons, rewards, sigmaVec) => {
   var accEpsilon = math.zeros([numParams, 1]);
-  for (var j=0; j < population; j++) {
+  for (var j=0; j < populationSize; j++) {
     var weighedEpsilon = math.multiply(rewards[j], epsilons[j]);
     accEpsilon = math.add(accEpsilon, weighedEpsilon);
   }
-  accEpsilon = math.multiply(alpha/(population*sigma), accEpsilon);
+  accEpsilon = math.multiply(alpha / populationSize, accEpsilon);
+  accEpsilon = math.dotDivide(accEpsilon, sigmaVec);
   return math.add(theta, accEpsilon);
 }
 
@@ -54,15 +56,37 @@ var remapFitnesses = (rewards) => {
   })
 }
 
+// Processes an update to the sigma vector (hopefully the money shot)
+var updateSigmaVec = (theta, epsilons, rewards, sigmaVec) => {
+  var meanVec = math.divide(math.sum(epsilons, 0), populationSize);
+  var interleaved = []
+  for (var i=0; i < populationSize; i++) {
+    interleaved.push([epsilons[i], rewards[i]]);
+  }
+  interleaved.sort((a, b) => b[1] - a[1]);
+  var elite = interleaved.map((x, i) => {
+    return x[0];
+  }).slice(0, numElite);
+
+  var result = math.zeros([numParams, 1]);
+  for (var i=0; i < numElite; i++) {
+    var squareDiff = math.square(math.subtract(elite[i], meanVec));
+    result = math.add(result, squareDiff);
+  }
+  result = math.sqrt(math.divide(result, numElite));
+  result = math.multiply(result, metaSigma);
+  return result;
+}
+
 // Main learning loop
 var theta = math.random([numParams, 1], 0.1);
-var averageFitness = 0;
+var sigmaVec = math.random([numParams, 1], 0.1);
 for (var g=0; g < maxGenerations; g++) {
   var epsilons = [];
   var rewards = [];
   var maxFitness = -999999;
   var championParams;
-  for (var i=0; i < population; i++) {
+  for (var i=0; i < populationSize; i++) {
 
     // Generate epsilon/perturbation vector
     var perturbVec = []
@@ -70,28 +94,34 @@ for (var g=0; g < maxGenerations; g++) {
       perturbVec.push(randn_bm());
     }
     perturbVec = math.reshape(perturbVec, [numParams, 1]);
+
+    // Jitter with sigma vector
+    perturbVec = math.dotMultiply(sigmaVec, perturbVec);
     epsilons.push(perturbVec);
 
     // Create and evaluate agent
-    var params = math.add(theta, math.multiply(sigma, perturbVec));
-    var agent = new Chicken(params);
+    var params = math.add(theta, perturbVec);
+    var agent = new Agent(params);
     var reward = 0;
     for (var t=0; t < numTrials; t++) {
-      reward += evaluateAgent(agent);
+      reward += evaluateAgent(agent) / numTrials;
     }
-    rewards.push(reward/numTrials);
+    rewards.push(reward);
 
-    if (reward/numTrials > maxFitness) {
-      maxFitness = reward/numTrials;
+    if (reward > maxFitness) {
+      maxFitness = reward;
       championParams = params;
     }
   }
 
+  // Update theta and sigmas
   fitnesses = remapFitnesses(rewards);
-  theta = updateTheta(theta, epsilons, fitnesses);
-  averageFitness = rewards.reduce((a,b) => a + b, 0)/population;
-  console.log('Generation: ' + g + ', Max: ' + maxFitness + ', Average: ' + averageFitness);
+  theta = updateTheta(theta, epsilons, fitnesses, sigmaVec);
+  sigmaVec = updateSigmaVec(theta, epsilons, fitnesses, sigmaVec);
 
+  // Log and freeze
+  var averageFitness = rewards.reduce((a,b) => a + b, 0) / populationSize;
+  console.log('Generation: ' + g + ', Max: ' + maxFitness + ', Average: ' + averageFitness);
   if (g % 100 === 0) {
     var encoded = JSON.stringify(championParams)
     encoded = 'var data = ' + encoded + '\nmodule.exports = { data: data };'

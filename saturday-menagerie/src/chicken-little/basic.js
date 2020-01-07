@@ -7,9 +7,10 @@ const fs = require('fs');
 const maxGenerations = 8000;
 const population = 200;
 const numTrials = 5;
-const numElite = 20;
+const numElite = 40;
 const mutateChance = 0.8;
 const mutateSigma = 0.1;
+const numParams = 83;
 
 // [Borrowed] Standard Normal variate using Box-Muller transform.
 var randn_bm = () => {
@@ -65,7 +66,7 @@ var breed = (sortedPopulation) => {
 
     // Crossover
     var child = [];
-    for (var w=0; w < 83; w++) {
+    for (var w=0; w < numParams; w++) {
       var gene;
       if (Math.random() < 0.5) {
         gene = parentOne[w]
@@ -91,7 +92,7 @@ var breed = (sortedPopulation) => {
 }
 
 // Main learning loop
-var theta = math.random([83, 1], 0.1);
+var theta = math.random([numParams, 1], -0.5, 0.5);
 var averageFitness = 0;
 var currentPopulation = [];
 for (var g=0; g < maxGenerations; g++) {
@@ -108,7 +109,7 @@ for (var g=0; g < maxGenerations; g++) {
       params = currentPopulation[i];
     } else {
       params = []
-      for (var j=0; j < 83; j++) {
+      for (var j=0; j < numParams; j++) {
         var x = math.random() * 5;
         x *= Math.floor(Math.random()*2) == 1 ? 1 : -1;
         params.push(x)
