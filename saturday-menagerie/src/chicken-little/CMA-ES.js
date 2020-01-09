@@ -1,16 +1,20 @@
 const MultivariateNormal = require('multivariate-normal').default;
 const env = require('./env');
 const { Chicken: Agent } = require('./agents');
-const math = require('mathjs');
+const numeric = require('numeric');
+const { create, all } = require('mathjs');
+const math = create(all);
 const fs = require('fs');
+
+math.import(numeric, { wrap: true, silent: true });
 
 // Settings
 const maxGenerations = 5000;
-const populationSize = 200;
+const populationSize = 800;
 const numParams = 83;
 const metaSigma = 1;
 const numTrials = 5;
-const numElite = 50;
+const numElite = 400;
 
 // Evaluates a single agent
 var evaluateAgent = (agent) => {
@@ -42,26 +46,44 @@ var adaptCovMat = (sortedParams) => {
   for (var n=0; n < numElite; n++) {
     var indiv = sortedParams[n];
     var diff = math.subtract(indiv, meanVec);
-    var part = math.divide(math.multiply(diff, math.transpose(diff)), numElite);
+    var part = math.multiply(math.reshape(diff, [numParams, 1]), [diff]);
     result = math.add(result, part);
   }
-  console.log(result)
   return result;
 }
 
 // Main learning loop
-var mean = math.random([1, numParams], 0.1)[0];
+var mean = math.random([1, numParams], 1)[0];
+
+/* Eigendecomposition method
+var b = math.identity([numParams, numParams]);
+var d = math.identity([numParams, numParams]);
+var c;
+// TODO: replace with simple gaussian vector
+var distribution = MultivariateNormal(math.zeros([1, numParams])[0], math.identity([numParams, numParams]));
+*/
+
 var covarianceMatrix = math.identity([numParams, numParams]);
+
 for (var g=0; g < maxGenerations; g++) {
   var genMaxReward = -999999;
-  var distribution = MultivariateNormal(mean, covarianceMatrix)
+
+  var distribution = MultivariateNormal(mean, covarianceMatrix);
 
   // An array storing "(agent-params, reward)" tuples
   var paramRewards = [];
   for (var i=0; i < populationSize; i++) {
 
+    /* Eigendecomposition method
     // Create and evaluate agent
+    var z = distribution.sample();
+
+    // TODO: scale by sigma
+    var params = math.add(mean, math.multiply(b, math.multiply(d, z)));
+    */
+
     var params = distribution.sample();
+
     var agent = new Agent(params);
     var reward = 0;
     for (var t=0; t < numTrials; t++) {
@@ -80,7 +102,16 @@ for (var g=0; g < maxGenerations; g++) {
   var eliteParams = sortedParams.slice(0, numElite);
   mean = math.divide(math.sum(eliteParams, 0), numElite);
 
+  /* Eigendecomposition method
   // Adapt covariance matrix
+  c = adaptCovMat(sortedParams);
+  var scope = {
+    c: c,
+  }
+  d = math.sqrt(math.diag(math.evaluate('eig(c)', scope).lambda.x));
+  b = math.evaluate('eig(c)', scope).E.x;
+  */
+
   covarianceMatrix = adaptCovMat(sortedParams);
 
   averageFitness = paramRewards.reduce((a, b) => a + b[1], 0) / populationSize;
