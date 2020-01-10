@@ -10,11 +10,11 @@ math.import(numeric, { wrap: true, silent: true });
 
 // Settings
 const maxGenerations = 5000;
-const populationSize = 400;
+const populationSize = 800;
 const numParams = 83;
 const sigma = 0.3;
 const numTrials = 5;
-const numElite = 15;
+const numElite = 30;
 
 // Evaluates a single agent
 var evaluateAgent = (agent) => {

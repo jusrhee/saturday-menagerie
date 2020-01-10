@@ -9,7 +9,7 @@ import { data as CMA } from '../rastrigin/freezer/CMA.js'
 const Plotly = window.Plotly;
 const Plot = createPlotlyComponent(Plotly);
 
-export default class Rastrigrin extends React.Component {
+export default class Rastrigin extends React.Component {
   state = {
     source: ES,
     selectedIndex: 0,
