@@ -1,6 +1,6 @@
 const MultivariateNormal = require('multivariate-normal').default;
 const env = require('./env');
-const { DeterminedChicken: Agent } = require('./agents');
+const { Brain: Agent } = require('./agents');
 const numeric = require('numeric');
 const { create, all } = require('mathjs');
 const math = create(all);
@@ -9,25 +9,20 @@ const fs = require('fs');
 math.import(numeric, { wrap: true, silent: true });
 
 // Settings
-const maxGenerations = 5000;
-const populationSize = 400;
-const numParams = 83;
+const maxGenerations = 100;
+const populationSize = 200;
+const numParams = 2;
 const sigma = 0.3;
-const numTrials = 5;
+const numTrials = 1;
 const numElite = 15;
 
 // Evaluates a single agent
 var evaluateAgent = (agent) => {
   var reward = 0;
   var observation = env.reset();
-  var done = false
-  while (!done) {
-    var feedback = agent.act(observation, env);
-    var delta = feedback.reward;
-    done = feedback.done;
-    observation = feedback.observation;
-    reward += delta;
-  }
+  var feedback = agent.act(observation, env);
+  var delta = feedback.reward;
+  reward += delta;
   return reward;
 }
 
@@ -53,7 +48,7 @@ var adaptCovMat = (sortedParams) => {
 }
 
 // Main learning loop
-var mean = math.random([1, numParams], 1)[0];
+var mean = math.random([1, numParams], 4.4, 4.5)[0];
 
 /* Eigendecomposition method
 var b = math.identity([numParams, numParams]);
@@ -64,7 +59,7 @@ var distribution = MultivariateNormal(math.zeros([1, numParams])[0], math.identi
 */
 
 var covarianceMatrix = math.identity([numParams, numParams]);
-
+var trace = [];
 for (var g=0; g < maxGenerations; g++) {
   var genMaxReward = -999999;
 
@@ -72,6 +67,7 @@ for (var g=0; g < maxGenerations; g++) {
 
   // An array storing "(agent-params, reward)" tuples
   var paramRewards = [];
+  var gen = [];
   for (var i=0; i < populationSize; i++) {
 
     /* Eigendecomposition method
@@ -90,12 +86,14 @@ for (var g=0; g < maxGenerations; g++) {
       reward += evaluateAgent(agent) / numTrials;
     }
     paramRewards.push([params, reward]);
+    gen.push([[params[0]], [params[1]]]);
 
     if (reward > genMaxReward) {
       genMaxReward = reward;
       championParams = params;
     }
   }
+  trace.push(gen);
 
   // Sample new mean from elite population
   var sortedParams = sortParams(paramRewards);
@@ -116,4 +114,10 @@ for (var g=0; g < maxGenerations; g++) {
 
   averageFitness = paramRewards.reduce((a, b) => a + b[1], 0) / populationSize;
   console.log('Generation: ' + g + ', Max: ' + genMaxReward + ', Average: ' + averageFitness);
+
+  if (g === maxGenerations - 1) {
+    var encoded = JSON.stringify(trace)
+    encoded = 'var data = ' + encoded + '\nmodule.exports = { data: data };'
+    fs.writeFileSync("./freezer/CMA.js", encoded);
+  }
 }
