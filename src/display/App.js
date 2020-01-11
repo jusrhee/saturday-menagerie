@@ -1,7 +1,7 @@
 import React from 'react';
-import Taxi from './Taxi';
-import ChickenLittle from './ChickenLittle';
-import Rastrigin from './Rastrigin';
+import Taxi from '../problems/taxi-v3/Taxi';
+import ChickenLittle from '../problems/chicken-little/ChickenLittle';
+import Rastrigin from '../problems/rastrigin/Rastrigin';
 import styled, { createGlobalStyle } from 'styled-components'
 
 export default class App extends React.Component {

@@ -15,6 +15,7 @@ import { data as data_2314 } from '../taxi-v3/freezer/2314.js';
 export default class Main extends React.Component {
   state = {
     environment: env.mTPReset(),
+    actionLog: null,
     play: false,
     agent: null,
     interval: null,
@@ -35,7 +36,10 @@ export default class Main extends React.Component {
     var { agent } = this.state;
     var feedback = agent.act(this.state.environment, env);
     var done = feedback.done;
-    this.setState({ environment: feedback.observation });
+    this.setState({
+      environment: feedback.observation,
+      actionLog: feedback.info.actionLog,
+    });
 
     if (done) {
       this.togglePlay(false);
@@ -81,7 +85,7 @@ export default class Main extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ environment: env.mTPReset() });
+    this.setState({ environment: env.mTPReset(), actionLog: null });
   }
 
   setAgent = (params, i) => {
@@ -176,7 +180,7 @@ export default class Main extends React.Component {
 
   renderActionLog = () => {
     var output;
-    switch (this.state.environment.actionLog) {
+    switch (this.state.actionLog) {
       case 0:
         output = '(South)';
         break;

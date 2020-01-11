@@ -1,15 +1,11 @@
 /*
 
-  Custom JS implementation of the OpenAI Taxi-v3 environment
-  https://gym.openai.com/envs/Taxi-v3/
+  Sean's Chicken Little environment [7]
 
   Permissible actions:
-  - 0: move south
-  - 1: move north
-  - 2: move east
-  - 3: move west
-  - 4: pickup passenger
-  - 5: dropoff passenger
+  - 0: stay still
+  - 1: move left
+  - 2: move right
 
 */
 
@@ -23,8 +19,9 @@ var state = {
   bY: 11,
   cX: 5,
   cY: 14,
-  actionLog: null,
 }
+
+var actionLog = null;
 
 // Resets the environment (returns observation)
 var reset = () => {
@@ -38,7 +35,7 @@ var reset = () => {
 
   order = [2, 3, 3, 2, 3, 0, 0, 0, 2, 1, 0, 1, 0, 4, 0, 1, 4, 0, 2, 0, 1, 1, 0, 2, 0, 1, 1, 2, 4, 1, 0, 3, 4, 3, 1, 3, 1, 4, 3, 4, 0, 0, 4, 0, 1, 0, 4, 4, 0, 2, 1, 3, 2, 2, 0, 4, 3, 4, 0, 0, 2, 2, 4, 3, 2, 4, 4, 0, 3, 2, 1, 1, 0, 1, 0, 1, 2, 1, 0, 2, 4, 2, 2, 3, 2, 3, 2, 1, 1, 3, 1, 2, 4, 0, 3, 1, 1, 4, 1, 1, 2, 1, 2, 1, 0, 4, 1, 4, 1, 2, 1, 1, 1, 3, 4, 2, 3, 0, 0, 1, 3, 1, 3, 4, 0, 4, 3, 2, 4, 4, 3, 3, 2, 3, 0, 0, 0, 4, 0, 0, 3, 4, 2, 0, 1, 4, 4, 3, 1, 1, 4, 0, 3, 4, 1, 4, 3, 2, 1, 4, 4, 1, 4, 2, 3, 2, 0, 0, 4, 1, 2, 3, 1, 3, 1, 4, 0, 1, 3, 1, 4, 0, 0, 0, 4, 3, 4, 4, 1, 4, 1, 0, 4, 3, 0, 0, 1, 1, 2, 2];
 
-  state.actionLog = null;
+  actionLog = null;
   return state;
 }
 
@@ -63,7 +60,7 @@ var isDead = (x, aX, aY, bX, bY, cX, cY) => {
 
 // Updates the environment
 var step = (action) => {
-  state.actionLog = action;
+  actionLog = action;
 
   var done = false;
   var reward = 1;
@@ -114,6 +111,7 @@ var step = (action) => {
     observation: state,
     reward: reward,
     done: done,
+    info: { actionLog },
   });
 }
 

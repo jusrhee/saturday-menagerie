@@ -1,6 +1,6 @@
 /*
 
-  Custom JS implementation of the OpenAI Taxi-v3 environment
+  Custom JS implementation of the OpenAI Taxi-v3 environment [4]
   https://gym.openai.com/envs/Taxi-v3/
 
   Permissible actions:
@@ -16,10 +16,11 @@
 var state = {
   taxiRow: 2,
   taxiColumn: 2,
-  passenger: 2,
-  destination: 3,
-  actionLog: null,
+  passenger: 0,
+  destination: 1,
 }
+
+var actionLog = null;
 
 // Resets the environment (returns observation)
 var reset = () => {
@@ -32,7 +33,7 @@ var reset = () => {
   state.passenger = locations[0];
   state.destination = locations[1];
 
-  state.actionLog = null;
+  actionLog = null;
   return state;
 }
 
@@ -40,10 +41,10 @@ var reset = () => {
 var mTPReset = () => {
   state.taxiRow = 2;
   state.taxiColumn = 2;
-  state.passenger = 2;
-  state.destination = 3;
+  state.passenger = 0;
+  state.destination = 1;
 
-  state.actionLog = null;
+  actionLog = null;
   return state;
 }
 
@@ -114,7 +115,7 @@ var validDropoff = (taxiRow, taxiColumn) => {
 
 // Updates the environment
 var step = (action) => {
-  state.actionLog = action;
+  actionLog = action;
   let { taxiRow, taxiColumn, passenger, destination } = state;
 
   var reward = -1;
@@ -162,6 +163,7 @@ var step = (action) => {
     observation: state,
     reward: reward,
     done: done,
+    info: { actionLog }
   });
 }
 

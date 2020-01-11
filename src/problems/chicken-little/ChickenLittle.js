@@ -16,6 +16,7 @@ export default class ChickenLittle extends React.Component {
     selectedAgentIndex: 0,
     showSidebar: false,
     score: 0,
+    actionLog: null,
   }
 
   componentDidMount() {
@@ -32,7 +33,11 @@ export default class ChickenLittle extends React.Component {
     var feedback = agent.act(this.state.environment, env);
     var done = feedback.done;
     var newScore = this.state.score + feedback.reward;
-    this.setState({ environment: feedback.observation, score: newScore });
+    this.setState({
+      environment: feedback.observation,
+      score: newScore,
+      actionLog: feedback.info.actionLog,
+    });
 
     if (done) {
       this.togglePlay(false);
@@ -67,8 +72,7 @@ export default class ChickenLittle extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ environment: env.reset(), score: 0 });
-    console.log(this.state.environment);
+    this.setState({ environment: env.reset(), score: 0, actionLog: null });
   }
 
   setAgent = (params, i) => {
@@ -153,7 +157,7 @@ export default class ChickenLittle extends React.Component {
 
   renderActionLog = () => {
     var output;
-    switch (this.state.environment.actionLog) {
+    switch (this.state.actionLog) {
       case 0:
         output = '(Still)';
         break;
