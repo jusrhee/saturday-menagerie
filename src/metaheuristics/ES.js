@@ -53,7 +53,11 @@ var remapFitnesses = (rewards) => {
   })
 }
 
-var run = (env, settings, agentClass, config) => {
+var log = async (socket, msg) => {
+  socket.emit('logs', msg);
+}
+
+var run = (env, settings, agentClass, config, socket) => {
 
   // Override settings [can probably use spread syntax here..]
   maxGenerations = settings.maxGenerations || maxGenerations;
@@ -100,7 +104,10 @@ var run = (env, settings, agentClass, config) => {
     fitnesses = remapFitnesses(rewards);
     theta = updateTheta(theta, epsilons, fitnesses);
     averageFitness = rewards.reduce((a,b) => a + b, 0) / population;
-    console.log('Generation: ' + g + ', Max: ' + maxFitness + ', Average: ' + averageFitness);
+    var msg = 'Generation: ' + g + ', Max: ' + maxFitness + ', Average: ' + averageFitness;
+    console.log(msg);
+    log(socket, msg);
+
   }
 }
 

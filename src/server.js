@@ -1,17 +1,40 @@
 const express = require('express');
+const bodyParser = require("body-parser");
 const { train } = require('./meta-train.js');
-
+const io = require('socket.io');
 const app = express();
+
+const server = io.listen(8001);
+
+server.on('connect', (socket) => {
+  console.log('Socket connected');
+});
 
 const port = 8000;
 app.listen(port, () => console.log(`Training server listening on port ${port}!`));
 
-app.get('/train', (req, res) => {
-  res.send('Uh oh.');
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
+
+app.use(bodyParser.json());
+
+app.post('/train', (req, res) => {
+  res.send('Metatrain requested');
+  var data = req.body.data;
+  train(data.env, data.heuristic, data.settings, data.agent, data.config, data.title, server.sockets);
 });
 
 app.get('/testOne', (req, res) => {
-  res.send('rough');
+  res.send('Test #1');
   var s = {
     maxGenerations: 5000,
     alpha: 0.00001,
@@ -26,7 +49,7 @@ app.get('/testOne', (req, res) => {
 });
 
 app.get('/testTwo', (req, res) => {
-  res.send('idk');
+  res.send('Test #2');
   var s = {
     maxGenerations: 5000,
     alpha: 0.0003,

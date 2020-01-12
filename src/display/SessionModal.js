@@ -1,11 +1,12 @@
 import React from 'react';
 import Selector from './Selector.js';
+import axios from 'axios';
 import data from './rosetta';
+import io from 'socket.io-client';
 
 import styled from 'styled-components'
 
 export default class SessionModal extends React.Component {
-
   state = {
     sessionName: '',
     selectedEnv: null,
@@ -15,6 +16,12 @@ export default class SessionModal extends React.Component {
     agentConfig: {},
     showHeuristicSettings: false,
     showAgentConfig: false,
+    socket: null,
+  }
+
+  componentDidMount() {
+    var socket = io('http://localhost:8001');
+    socket.on('logs', data => console.log(data));
   }
 
   submit = () => {
@@ -23,9 +30,27 @@ export default class SessionModal extends React.Component {
     for (var key in heuristicSettings) {
       heuristicSettings[key] = parseFloat(heuristicSettings[key]);
     }
-    agentConfig.architecture = JSON.parse(agentConfig.architecture);
 
-    console.log(sessionName, selectedEnv, selectedHeuristic.value, heuristicSettings, selectedAgent.value, agentConfig);
+    if (agentConfig.architecture) {
+      agentConfig.architecture = JSON.parse(agentConfig.architecture);
+    }
+
+    var data = {
+      env: selectedEnv,
+      heuristic: selectedHeuristic.value,
+      settings: heuristicSettings,
+      agent: selectedAgent.value,
+      config: agentConfig,
+      title: sessionName
+    };
+
+    axios.post('http://localhost:8000/train', { data: data })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
   }
 
   onHSChange = (e, name) => {

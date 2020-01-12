@@ -30,9 +30,9 @@ var getNumParams = (architecture) => {
  * @param config {...} - Agent configuration options
  * @param sessionName [str] - Name for the training session
  */
-var train = (e, mh, settings, agentType, config, sessionName) => {
+var train = (e, mh, settings, agentType, config, sessionName, socket) => {
 
-  // Set metaheuristic 
+  // Set metaheuristic
   var heuristic;
   switch (mh) {
     case 'ES':
@@ -74,7 +74,7 @@ var train = (e, mh, settings, agentType, config, sessionName) => {
     settings.numParams = getNumParams(config.architecture);
   }
 
-  heuristic.run(env, settings, agentClass, config);
+  heuristic.run(env, settings, agentClass, config, socket);
 }
 
 module.exports = {
