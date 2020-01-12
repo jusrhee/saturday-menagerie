@@ -53,11 +53,7 @@ var remapFitnesses = (rewards) => {
   })
 }
 
-var log = async (socket, msg) => {
-  socket.emit('logs', msg);
-}
-
-var run = (env, settings, agentClass, config, socket) => {
+var run = (env, settings, agentClass, config) => {
 
   // Override settings [can probably use spread syntax here..]
   maxGenerations = settings.maxGenerations || maxGenerations;
@@ -71,6 +67,7 @@ var run = (env, settings, agentClass, config, socket) => {
   // Main learning loop [TODO: parameterize initialization range]
   var theta = math.random([numParams, 1], 0.1);
   var averageFitness = 0;
+  fs.writeFileSync('./logs.json', '');
   for (var g=0; g < maxGenerations; g++) {
     var epsilons = [];
     var rewards = [];
@@ -105,8 +102,25 @@ var run = (env, settings, agentClass, config, socket) => {
     theta = updateTheta(theta, epsilons, fitnesses);
     averageFitness = rewards.reduce((a,b) => a + b, 0) / population;
     var msg = 'Generation: ' + g + ', Max: ' + maxFitness + ', Average: ' + averageFitness;
+
+    /*
+    var data = fs.readFileSync('./logs.json', 'utf8')
+    data = data.replace('[', '')
+    data = data.replace(']', '');
+    if (g > 0) {
+      data += ',';
+    }
+    var asdf = '[' + data + '"' + msg + '"' + ']';
+    console.log(asdf);
+    fs.writeFileSync("./logs.json", asdf);
+    */
+    
     console.log(msg);
-    log(socket, msg);
+    /*
+      var encoded = JSON.stringify(championParams)
+      encoded = 'var data = ' + encoded + '\nmodule.exports = { data: data };'
+      fs.writeFileSync("../problems/freezer/" + g + ".js", encoded);
+    */
 
   }
 }

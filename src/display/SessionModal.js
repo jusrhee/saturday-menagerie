@@ -1,13 +1,13 @@
 import React from 'react';
 import Selector from './Selector.js';
+
 import axios from 'axios';
 import data from './rosetta';
-import io from 'socket.io-client';
-
 import styled from 'styled-components'
 
 export default class SessionModal extends React.Component {
   state = {
+    logMode: false,
     sessionName: '',
     selectedEnv: null,
     selectedHeuristic: null,
@@ -17,11 +17,8 @@ export default class SessionModal extends React.Component {
     showHeuristicSettings: false,
     showAgentConfig: false,
     socket: null,
-  }
-
-  componentDidMount() {
-    var socket = io('http://localhost:8001');
-    socket.on('logs', data => console.log(data));
+    interval: null,
+    buttonText: 'Generate'
   }
 
   submit = () => {
@@ -44,9 +41,13 @@ export default class SessionModal extends React.Component {
       title: sessionName
     };
 
+    var self = this;
     axios.post('http://localhost:8000/train', { data: data })
       .then(function (response) {
-        console.log(response);
+        /*
+        self.setState({ logMode: true });
+        */
+        self.setState({ buttonText: 'Training . . .' });
       })
       .catch(function (error) {
         console.log(error);
@@ -120,12 +121,14 @@ export default class SessionModal extends React.Component {
     }
   }
 
-  render() {
+  renderContents = () => {
+    /*
+    if (this.state.logMode) {
+      return <Logger />
+    }
+    */
     return (
-      <StyledSessionModal>
-        <CloseIcon onClick={this.props.closeModal}>
-          <i className="material-icons">close</i>
-        </CloseIcon>
+      <div>
         <PanelTitle>
           Create Session
           <Line />
@@ -171,7 +174,18 @@ export default class SessionModal extends React.Component {
           select={(x) => this.setState({ selectedAgent: x })}
         />
         {this.renderAgentConfig()}
-        <SubmitButton onClick={this.submit}>Generate</SubmitButton>
+        <SubmitButton onClick={this.submit}>{this.state.buttonText}</SubmitButton>
+      </div>
+    )
+  }
+
+  render() {
+    return (
+      <StyledSessionModal>
+        <CloseIcon onClick={this.props.closeModal}>
+          <i className="material-icons">close</i>
+        </CloseIcon>
+        {this.renderContents()}
       </StyledSessionModal>
     );
   }

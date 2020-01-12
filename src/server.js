@@ -1,14 +1,7 @@
 const express = require('express');
 const bodyParser = require("body-parser");
 const { train } = require('./meta-train.js');
-const io = require('socket.io');
 const app = express();
-
-const server = io.listen(8001);
-
-server.on('connect', (socket) => {
-  console.log('Socket connected');
-});
 
 const port = 8000;
 app.listen(port, () => console.log(`Training server listening on port ${port}!`));
@@ -30,7 +23,7 @@ app.use(bodyParser.json());
 app.post('/train', (req, res) => {
   res.send('Metatrain requested');
   var data = req.body.data;
-  train(data.env, data.heuristic, data.settings, data.agent, data.config, data.title, server.sockets);
+  train(data.env, data.heuristic, data.settings, data.agent, data.config, data.title);
 });
 
 app.get('/testOne', (req, res) => {
