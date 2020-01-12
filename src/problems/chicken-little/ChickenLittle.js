@@ -253,8 +253,8 @@ const SidebarTab = styled.div`
 
 const CloseIcon = styled.div`
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 15px;
+  right: 15px;
   cursor: pointer;
 
   > i {

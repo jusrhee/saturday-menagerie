@@ -15,7 +15,6 @@ export default class Rastrigin extends React.Component {
     selectedIndex: 0,
     showSidebar: false,
     play: false,
-    actionLog: null,
     z: null,
     x: null,
     y: null,
@@ -363,15 +362,6 @@ const NavBar = styled.div`
     from { bottom: -70px; opacity: 0; }
     to   { bottom: 0px; opacity: 1; }
   }
-`;
-
-const ActionLog = styled.div`
-  margin-top: 20px;
-`;
-
-const X = styled.span`
-  color: ${props => props.pickup ? '#FF99E9' : props.dest ? '#5EB9ED' : ''};
-  background: ${props => props.block === 0 ? '#fcdf03dd' : props.block === 1 ? '#86f0c4dd' : ''};
 `;
 
 const DisplayWrapper = styled.div`

@@ -32,7 +32,7 @@ var getNumParams = (architecture) => {
  */
 var train = (e, mh, settings, agentType, config, sessionName) => {
 
-  // Set metaheuristic
+  // Set metaheuristic 
   var heuristic;
   switch (mh) {
     case 'ES':

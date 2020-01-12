@@ -1,0 +1,34 @@
+{
+  "environments": [
+    { "label": "OpenAI Taxi-v3", "value": "taxi-v3" },
+    { "label": "Chicken Little", "value": "chicken-little" },
+    { "label": "Rastrigin Function", "value": "rastrigin" }
+  ],
+  "metaheuristics": [
+    {
+      "label": "Evolution Strategy",
+      "value": "ES",
+      "settings": [
+        "maxGenerations",
+        "alpha",
+        "sigma",
+        "population",
+        "numTrials"
+      ]
+    },
+    {
+      "label": "Genetic Algorithm",
+      "value": "GA" ,
+      "settings": []
+    },
+    {
+      "label": "CMA-ES",
+      "value": "CMA-ES",
+      "settings": [] 
+    }
+  ],
+  "agents": [
+    { "label": "Stochastic Policy", "value": "stochastic" },
+    { "label": "Deterministic Policy", "value": "deterministic" }
+  ]
+}

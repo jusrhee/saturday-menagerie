@@ -1,12 +1,17 @@
 import React from 'react';
+
+// Import environment renderers
 import Taxi from '../problems/taxi-v3/Taxi';
 import ChickenLittle from '../problems/chicken-little/ChickenLittle';
 import Rastrigin from '../problems/rastrigin/Rastrigin';
+
+import SessionModal from './SessionModal.js';
 import styled, { createGlobalStyle } from 'styled-components'
 
 export default class App extends React.Component {
   state = {
     page: 1,
+    showSessionModal: true,
   }
 
   renderMain = () => {
@@ -30,6 +35,19 @@ export default class App extends React.Component {
     }
   }
 
+  renderSessionModal = () => {
+    if (this.state.showSessionModal) {
+      return (
+        <SessionModal closeModal={() => this.setState({ showSessionModal: false })}/>
+      )
+    }
+    return (
+      <SessionButton onClick={() => this.setState({ showSessionModal: true })}>
+        <i className="material-icons">add</i>
+      </SessionButton>
+    )
+  }
+
   render() {
     return (
       <div>
@@ -41,6 +59,7 @@ export default class App extends React.Component {
         <ForwardButton onClick={() => this.pageNav(1)}>
           <i className="material-icons">arrow_forward</i>
         </ForwardButton>
+        {this.renderSessionModal()}
       </div>
     );
   }
@@ -49,6 +68,32 @@ export default class App extends React.Component {
 const GlobalStyle = createGlobalStyle`
   * {
     box-sizing: border-box;
+  }
+`;
+
+const SessionButton = styled.div`
+  position: fixed;
+  height: 50px;
+  width: 50px;
+  right: 20px;
+  top: calc(50vh - 45px);
+  border-radius: 10px;
+  background: #ffffff33;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+
+  :hover {
+    width: 54px;
+    right: 18px;
+    height: 54px;
+    top: calc(50vh - 47px);
+  }
+
+  > i {
+    color: #ffffff;
   }
 `;
 
