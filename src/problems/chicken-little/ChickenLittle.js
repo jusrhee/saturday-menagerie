@@ -1,11 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { Chicken } from '../chicken-little/agents';
+// Just assume stochastic agent for now
+import { StochasticAgent } from '../../shared/meta-agents.js';
 import env from '../chicken-little/env';
-
-import { data as data_0 } from '../chicken-little/freezer/0.js'
-import { data as data_100 } from '../chicken-little/freezer/100.js';
 
 export default class ChickenLittle extends React.Component {
   state = {
@@ -13,14 +11,33 @@ export default class ChickenLittle extends React.Component {
     play: false,
     agent: null,
     interval: null,
-    selectedAgentIndex: 0,
-    showSidebar: false,
     score: 0,
     actionLog: null,
   }
 
+  importAll = (r) => {
+    return r.keys().map(r);
+  }
+
   componentDidMount() {
+    /*
     this.setAgent(data_0, 0);
+    */
+    var freezer = this.importAll(require.context('./freezer', false, /\.(js)$/));
+    console.log('chicken');
+    console.log(freezer);
+    this.props.openFreezer(freezer);
+    if (this.props.currentConfig) {
+      this.setAgent(this.props.currentParams, this.props.currentConfig);
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps !== this.props) {
+      if (this.props.currentConfig) {
+        this.setAgent(this.props.currentParams, this.props.currentConfig);
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -75,9 +92,9 @@ export default class ChickenLittle extends React.Component {
     this.setState({ environment: env.reset(), score: 0, actionLog: null });
   }
 
-  setAgent = (params, i) => {
-    var agent = new Chicken(params);
-    this.setState({ agent, selectedAgentIndex: i });
+  setAgent = (params, config, i) => {
+    var agent = new StochasticAgent(params, config);
+    this.setState({ agent });
   }
 
   renderPlaybackButton = () => {
@@ -173,47 +190,9 @@ export default class ChickenLittle extends React.Component {
     return <ActionLog>{output}</ActionLog>;
   }
 
-  renderSidebar = () => {
-    if (this.state.showSidebar) {
-      return (
-        <Sidebar>
-          <CloseIcon onClick={() => this.setState({ showSidebar: false })}>
-            <i className="material-icons">close</i>
-          </CloseIcon>
-          <SidebarTitle>
-            Select Agent
-            <Line />
-          </SidebarTitle>
-          <SidebarButton
-            onClick={() => this.setAgent(data_0, 0)}
-            selected={this.state.selectedAgentIndex === 0}
-          >
-            Generation 0
-          </SidebarButton>
-          <SidebarButton
-            onClick={() => this.setAgent(data_100, 1)}
-            selected={this.state.selectedAgentIndex === 1}
-          >
-            Generation 100
-          </SidebarButton>
-        </Sidebar>
-      )
-    }
-    return (
-      <SidebarTab onClick={() => this.setState({ showSidebar: true })}>
-        <i className="material-icons">keyboard_arrow_right</i>
-      </SidebarTab>
-    );
-  }
-
   render() {
     return (
       <StyledMain>
-        {this.renderSidebar()}
-        <Tag>
-          Experiment No.2
-          <Title>Chicken Little</Title>
-        </Tag>
         <DisplayWrapper>
           <Ascii>
             {this.renderAscii()}
@@ -232,89 +211,6 @@ export default class ChickenLittle extends React.Component {
     );
   }
 }
-
-const SidebarTab = styled.div`
-  width: 30px;
-  height: 60px;
-  border-top-right-radius: 60px;
-  border-bottom-right-radius: 60px;
-  background: #ffffff33;
-  position: fixed;
-  top: calc(50vh - 60px);
-  left: 0;
-  cursor: pointer;
-
-  > i {
-    margin-top: 16px;
-    color: white;
-    font-size: 25px;
-  }
-`;
-
-const CloseIcon = styled.div`
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  cursor: pointer;
-
-  > i {
-    color: #ffffff;
-  }
-`;
-
-const Sidebar = styled.div`
-  width: 200px;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: #ffffff22;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
-  color: white;
-  padding: 50px 25px 50px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  opacity: 0;
-  animation: float-sidebar 0.8s 0s;
-  animation-fill-mode: forwards;
-  @keyframes float-sidebar {
-    from { left: -200px; opacity: 1; }
-    to   { left: 0px; opacity: 1; }
-  }
-`;
-
-const SidebarTitle = styled.div`
-  margin-top: -50px;
-  margin-bottom: 20px;
-  margin-left: 5px;
-  font-size: 16px;
-  color: #ffffff88;
-`;
-
-const SidebarButton = styled.div`
-  width: 100%;
-  padding: 10px 15px;
-  font-weight: 300;
-  cursor: pointer;
-  border-radius: 5px;
-  margin-bottom: 5px;
-  background: ${props => props.selected ? '#ffffff11' : ''};
-
-  :hover {
-    background: #ffffff22;
-  }
-`;
-
-const Line = styled.div`
-  height: 1px;
-  width: 200px;
-  background: #ffffff88;
-  width: 90px;
-  margin-top: 10px;
-`;
 
 const Label = styled.div`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400&display=swap');
@@ -391,26 +287,6 @@ const Ascii = styled.div`
   font-weight: 300;
   color: #ffffff99;
   user-select: none;
-`;
-
-const Tag = styled.div`
-  color: #ffffff66;
-  letter-spacing: 3px;
-  @import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
-  font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
-  text-align: center;
-  position: fixed;
-  top: 50px;
-  width: 200px;
-  left: calc(50vw - 100px);
-  user-select: none;
-`;
-
-const Title = styled.div`
-  margin-top: 12px;
-  font-size: 20px;
-  color: #ffffff99;
 `;
 
 const StyledMain = styled.div`

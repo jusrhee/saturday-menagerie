@@ -30,7 +30,7 @@ var getNumParams = (architecture) => {
  * @param config {...} - Agent configuration options
  * @param sessionName [str] - Name for the training session
  */
-var train = (e, mh, settings, agentType, config, sessionName) => {
+var train = (e, mh, settings, agentType, config, sessionName, logFreq) => {
 
   // Set metaheuristic
   var heuristic;
@@ -74,7 +74,8 @@ var train = (e, mh, settings, agentType, config, sessionName) => {
     settings.numParams = getNumParams(config.architecture);
   }
 
-  heuristic.run(env, settings, agentClass, config);
+  // [tentatively passing on agentType so we can log for rebuilding the agent during playback!]
+  heuristic.run(env, e, settings, agentClass, config, sessionName, logFreq);
 }
 
 module.exports = {

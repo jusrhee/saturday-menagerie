@@ -13,7 +13,6 @@ export default class Rastrigin extends React.Component {
   state = {
     source: ES,
     selectedIndex: 0,
-    showSidebar: false,
     play: false,
     z: null,
     x: null,
@@ -166,53 +165,9 @@ export default class Rastrigin extends React.Component {
     );
   }
 
-  renderSidebar = () => {
-    if (this.state.showSidebar) {
-      return (
-        <Sidebar>
-          <CloseIcon onClick={() => this.setState({ showSidebar: false })}>
-            <i className="material-icons">close</i>
-          </CloseIcon>
-          <SidebarTitle>
-            Select Agent
-            <Line />
-          </SidebarTitle>
-          <SidebarButton
-            onClick={() => this.setAgent(ES, 0)}
-            selected={this.state.selectedIndex === 0}
-          >
-            Evol. Strategy
-          </SidebarButton>
-          <SidebarButton
-            onClick={() => this.setAgent(GA, 1)}
-            selected={this.state.selectedIndex === 1}
-          >
-            Genetic Algo.
-          </SidebarButton>
-          <SidebarButton
-            onClick={() => this.setAgent(CMA, 2)}
-            selected={this.state.selectedIndex === 2}
-          >
-            CMA-ES
-          </SidebarButton>
-        </Sidebar>
-      )
-    }
-    return (
-      <SidebarTab onClick={() => this.setState({ showSidebar: true })}>
-        <i className="material-icons">keyboard_arrow_right</i>
-      </SidebarTab>
-    );
-  }
-
   render() {
     return (
       <StyledMain>
-        {this.renderSidebar()}
-        <Tag>
-          Experiment No.3
-          <Title>Rastrigin Function</Title>
-        </Tag>
         <DisplayWrapper>
           <Ascii>
             {this.renderAscii()}
@@ -229,89 +184,6 @@ export default class Rastrigin extends React.Component {
     );
   }
 }
-
-const SidebarTab = styled.div`
-  width: 30px;
-  height: 60px;
-  border-top-right-radius: 60px;
-  border-bottom-right-radius: 60px;
-  background: #ffffff33;
-  position: fixed;
-  top: calc(50vh - 60px);
-  left: 0;
-  cursor: pointer;
-
-  > i {
-    margin-top: 16px;
-    color: white;
-    font-size: 25px;
-  }
-`;
-
-const CloseIcon = styled.div`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-
-  > i {
-    color: #ffffff;
-  }
-`;
-
-const Sidebar = styled.div`
-  width: 200px;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: #ffffff22;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
-  color: white;
-  padding: 50px 25px 50px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-
-  opacity: 0;
-  animation: float-sidebar 0.8s 0s;
-  animation-fill-mode: forwards;
-  @keyframes float-sidebar {
-    from { left: -200px; opacity: 1; }
-    to   { left: 0px; opacity: 1; }
-  }
-`;
-
-const SidebarTitle = styled.div`
-  margin-top: -50px;
-  margin-bottom: 20px;
-  margin-left: 5px;
-  font-size: 16px;
-  color: #ffffff88;
-`;
-
-const SidebarButton = styled.div`
-  width: 100%;
-  padding: 10px 15px;
-  font-weight: 300;
-  cursor: pointer;
-  border-radius: 5px;
-  margin-bottom: 5px;
-  background: ${props => props.selected ? '#ffffff11' : ''};
-
-  :hover {
-    background: #ffffff22;
-  }
-`;
-
-const Line = styled.div`
-  height: 1px;
-  width: 200px;
-  background: #ffffff88;
-  width: 90px;
-  margin-top: 10px;
-`;
 
 const Label = styled.div`
   @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400&display=swap');
@@ -377,26 +249,6 @@ const Ascii = styled.div`
   font-weight: 300;
   color: #ffffff99;
   user-select: none;
-`;
-
-const Tag = styled.div`
-  color: #ffffff66;
-  letter-spacing: 3px;
-  @import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
-  font-family: 'Open Sans', sans-serif;
-  font-size: 14px;
-  text-align: center;
-  position: fixed;
-  top: 50px;
-  width: 400px;
-  left: calc(50vw - 200px);
-  user-select: none;
-`;
-
-const Title = styled.div`
-  margin-top: 12px;
-  font-size: 20px;
-  color: #ffffff99;
 `;
 
 const StyledMain = styled.div`

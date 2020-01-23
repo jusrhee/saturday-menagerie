@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.post('/train', (req, res) => {
   res.send('Metatrain requested');
   var data = req.body.data;
-  train(data.env, data.heuristic, data.settings, data.agent, data.config, data.title);
+  train(data.env, data.heuristic, data.settings, data.agent, data.config, data.title, data.logFreq);
 });
 
 app.get('/testOne', (req, res) => {

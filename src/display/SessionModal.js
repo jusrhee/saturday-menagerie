@@ -18,11 +18,12 @@ export default class SessionModal extends React.Component {
     showAgentConfig: false,
     socket: null,
     interval: null,
+    logFreq: '',
     buttonText: 'Generate'
   }
 
   submit = () => {
-    var { sessionName, selectedEnv, selectedHeuristic, selectedAgent, heuristicSettings, agentConfig } = this.state;
+    var { sessionName, selectedEnv, selectedHeuristic, selectedAgent, heuristicSettings, agentConfig, logFreq } = this.state;
 
     for (var key in heuristicSettings) {
       heuristicSettings[key] = parseFloat(heuristicSettings[key]);
@@ -38,7 +39,8 @@ export default class SessionModal extends React.Component {
       settings: heuristicSettings,
       agent: selectedAgent.value,
       config: agentConfig,
-      title: sessionName
+      title: sessionName,
+      logFreq: logFreq
     };
 
     var self = this;
@@ -134,13 +136,20 @@ export default class SessionModal extends React.Component {
           <Line />
         </PanelTitle>
         <PanelLabel>
-          <i className="material-icons">label</i> Label
+          <i className="material-icons">create</i> Logging
         </PanelLabel>
+        <div />
         <Input
           placeholder='Session name'
           value={this.state.sessionName}
           onChange={(e) => this.setState({ sessionName: e.target.value })}
         />
+        <Freq
+          placeholder='Frequency'
+          value={this.state.logFreq}
+          onChange={(e) => this.setState({ logFreq: e.target.value })}
+        />
+        <div />
         <PanelLabel>
           <i className="material-icons">filter_hdr</i> Environment
         </PanelLabel>
@@ -234,6 +243,7 @@ const SubmitButton = styled.div`
 `;
 
 const Input = styled.input`
+  display: inline-block;
   font-size: 14px;
   background: transparent;
   outline: none;
@@ -242,11 +252,17 @@ const Input = styled.input`
   padding: 7px 3px;
   color: white;
   margin-bottom: 25px;
-  width: 100%;
+  margin-right: 15px;
+  width: 68%;
 
   ::placeholder {
     color: #ffffff88;
   }
+`;
+
+const Freq = styled(Input)`
+  width: calc(30% - 10px);
+  margin-right: 0px;
 `;
 
 const PanelLabel = styled.div`

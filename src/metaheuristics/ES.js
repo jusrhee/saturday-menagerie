@@ -53,7 +53,7 @@ var remapFitnesses = (rewards) => {
   })
 }
 
-var run = (env, settings, agentClass, config) => {
+var run = (env, e, settings, agentClass, config, sessionName, logFreq) => {
 
   // Override settings [can probably use spread syntax here..]
   maxGenerations = settings.maxGenerations || maxGenerations;
@@ -114,7 +114,7 @@ var run = (env, settings, agentClass, config) => {
     console.log(asdf);
     fs.writeFileSync("./logs.json", asdf);
     */
-    
+
     console.log(msg);
     /*
       var encoded = JSON.stringify(championParams)
@@ -122,6 +122,11 @@ var run = (env, settings, agentClass, config) => {
       fs.writeFileSync("../problems/freezer/" + g + ".js", encoded);
     */
 
+    if (g%(Math.round(1/logFreq)) === 0) {
+      var encoded = JSON.stringify(championParams);
+      encoded = 'var data = ' + encoded + '\nvar config = ' + JSON.stringify(config) + '\nmodule.exports = { data: data, config: config };'
+      fs.writeFileSync("./problems/" + e + "/freezer/" + sessionName + "_" + g + ".js", encoded);
+    }
   }
 }
 
