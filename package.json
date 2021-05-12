@@ -7,7 +7,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "axios": "^0.19.1",
-    "mathjs": "^6.2.5",
+    "mathjs": "^7.5.1",
     "multivariate-normal": "^0.1.2",
     "numeric": "^1.2.6",
     "plotly.js": "^1.52.0",
